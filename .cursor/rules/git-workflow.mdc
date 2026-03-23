@@ -1,0 +1,28 @@
+---
+description: Flujo de Git - subir a GitHub y documentar tras cada cambio
+alwaysApply: true
+---
+
+# Git Workflow - krakendork-tamagotchi
+
+Después de **cada cambio, mejora o fix** en el proyecto:
+
+## 1. Documentar
+- Actualizar `CHANGELOG.md` con fecha y descripción del cambio
+- Usar mensajes de commit descriptivos en español
+
+## 2. Subir a GitHub
+- `git add .`
+- `git commit -m "descripción clara del cambio"`
+- `git push origin master`
+
+## 3. Formato CHANGELOG
+```markdown
+## [Fecha] - Descripción breve
+
+### Cambios
+- Detalle 1
+- Detalle 2
+```
+
+Siempre ejecutar estos pasos al finalizar modificaciones al código.
