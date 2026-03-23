@@ -4,6 +4,19 @@ Registro de cambios del proyecto Krakendork.
 
 ---
 
+## [2025-03-23] - Refactor diseño + framework de animaciones
+
+### Cambios
+- **Estructura modular**: CSS en `css/main.css` y `css/animations.css`
+- **Motor de juego** (`js/engine.js`): Game loop con `requestAnimationFrame`, delta time, tick fijo (20/s)
+- **AnimationController**: State machine para estados (idle, walk, sleep, eat, happy, sad, sick, hatch)
+- **Easing & Tween**: Funciones de interpolación (linear, easeIn, easeOut, bounce) para transiciones
+- **Módulos JS**: `sprites.js`, `game.js`, `ui.js` separados
+- **Entry point**: `index.html` como principal; `tamagotchi.html` redirige
+- **60 FPS** de renderizado con lógica a 20 ticks/segundo
+
+---
+
 ## [2025-03-23] - Krakendork: San Bernardo + pulpo gigante
 
 ### Cambios
