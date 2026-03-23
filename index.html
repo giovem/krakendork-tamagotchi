@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#9b5fa5">
   <title>Krakendork 🐕🦑</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/animations.css">
 </head>
@@ -54,6 +56,11 @@
         <div class="time-display" id="time-display">12:00</div>
       </div>
 
+      <div class="tutorial-overlay" id="tutorial-overlay">
+        <div class="tutorial-text">Toca la zona del creature para acariciar. Botones A/B/C para menú.</div>
+        <button class="restart-btn" onclick="document.getElementById('tutorial-overlay').style.display='none'">Entendido</button>
+      </div>
+
       <div class="menu-overlay" id="menu-overlay">
         <div class="menu-title">MENÚ</div>
         <div class="menu-item" id="mi-food" onclick="Krakendork.selectMenu('food')"><span>🍙</span> Alimentar</div>
@@ -67,6 +74,7 @@
 
       <div class="stats-panel" id="stats-panel">
         <div class="panel-title">📊 ESTADO</div>
+        <div class="panel-stat"><span class="panel-stat-label">NOMBRE</span><input type="text" id="ps-name" maxlength="12" placeholder="Krakendork" style="font-size:6px;padding:2px;width:60px" onblur="Krakendork.setName(this.value)"></div>
         <div class="panel-stat">
           <span class="panel-stat-label">HAMBRE</span>
           <div class="panel-stat-bar" id="ps-hunger-bg"><div id="ps-hunger" style="height:100%;background:var(--pixel);transition:width .3s"></div></div>
@@ -93,10 +101,12 @@
           <span class="panel-stat-val" id="psv-weight">5</span>
         </div>
         <div class="panel-stat" style="margin-top:2px">
-          <span class="panel-stat-label" style="width:auto;font-size:6px">Edad: <span id="ps-age">0</span>d &nbsp; Felices: <span id="ps-hc">0</span> &nbsp;</span>
+          <span class="panel-stat-label" style="width:auto;font-size:6px">Edad: <span id="ps-age">0</span>d &nbsp; Felices: <span id="ps-hc">0</span></span>
           <span class="panel-stat-label" id="ps-sick" style="color:#f44;font-size:6px"></span>
         </div>
+        <div class="panel-stat" style="font-size:5px" id="ps-achievements"></div>
         <div style="margin-top:4px;text-align:center;font-size:6px;color:var(--pixel);cursor:pointer;text-decoration:underline" onclick="Krakendork.closeStats()">[ cerrar ]</div>
+        <div style="margin-top:2px;text-align:center;font-size:5px;color:#666;cursor:pointer" onclick="if(confirm('¿Empezar de cero?')){Krakendork.initGame(true);Krakendork.closeStats();}">[ Nuevo huevo ]</div>
       </div>
 
       <div class="game-area" id="game-area">
@@ -145,6 +155,10 @@
 
 <script src="js/engine.js"></script>
 <script src="js/sprites.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/visibility.js"></script>
+<script src="js/input.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
 <script src="js/main.js"></script>

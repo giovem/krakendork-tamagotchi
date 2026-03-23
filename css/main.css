@@ -106,11 +106,13 @@ body {
   transition: width 0.5s;
 }
 
-/* Creature area */
+/* Creature area - tap para acariciar */
 .creature-area {
   position: absolute;
   top: 38px; left: 0; right: 0; bottom: 28px;
   display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
 .screen-bottom {
@@ -254,6 +256,15 @@ body {
   display: none; flex-direction: column;
   align-items: center; justify-content: center; gap: 8px;
 }
+
+.tutorial-overlay {
+  position: absolute; inset: 0; z-index: 35;
+  background: rgba(139, 172, 15, 0.95);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  padding: 12px;
+}
+.tutorial-text { font-size: 6px; color: var(--pixel); text-align: center; line-height: 1.8; }
 
 .dead-screen .ghost { font-size: 28px; }
 .dead-text,

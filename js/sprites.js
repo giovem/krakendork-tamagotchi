@@ -71,14 +71,21 @@
 
   const COLORS = { 1: '#0f380f', 2: '#306230', 3: '#8bac0f', 0: null };
 
+  // San Bernardo: blanco/marrón. Pulpo: tonos más oscuros en etapas avanzadas
   const STAGE_TINTS = [
-    {1:'#0f380f', 2:'#6a6a6a', 3:'#c8c8c8'},
-    {1:'#0f380f', 2:'#5a3060', 3:'#c08acc'},
-    {1:'#0f380f', 2:'#1a5050', 3:'#5ac8c8'},
-    {1:'#0f380f', 2:'#4a3a00', 3:'#c8a800'},
-    {1:'#0f380f', 2:'#1a3a1a', 3:'#5acc5a'},
-    {1:'#0f380f', 2:'#3a1a00', 3:'#c87a00'},
+    {1:'#0f380f', 2:'#6a6a6a', 3:'#c8c8c8'},           // egg - gris
+    {1:'#4a3020', 2:'#8b6914', 3:'#f5e6d3'},           // baby - San Bernardo (marrón/blanco)
+    {1:'#4a3020', 2:'#8b6914', 3:'#f5e6d3'},           // child
+    {1:'#3d2817', 2:'#7a5512', 3:'#e8d4b8'},           // teen - máscara más oscura
+    {1:'#2d1f10', 2:'#5a3d0a', 3:'#d4c4a8'},           // adult - más definido
+    {1:'#1a1208', 2:'#3d2a08', 3:'#a89878'},           // elder/krakendork
   ];
+
+  // Rasgos: cola peluda, tentáculos (sprites overlay)
+  const TRAIT_SPRITES = {
+    tail: [[0,1,1],[0,2,2],[1,2,2],[0,1,1]],
+    tentacle: [[1,2,2,1],[0,1,2,1],[0,0,1,2]],
+  };
 
   function drawSprite(ctx, sprite, ox, oy, scale = 4, tint = null) {
     const colors = tint || COLORS;
@@ -115,12 +122,33 @@
     return STAGE_TINTS[Math.min(G.stage, 5)];
   }
 
+  function drawTraitOverlay(ctx, G, ox, oy, scale) {
+    const traits = G.traits || {};
+    const f = Math.floor(G.frame / 15) % 2;
+    if (traits.tail > 0 && G.stage >= 2) {
+      const tailSprite = TRAIT_SPRITES.tail;
+      const tx = ox + 4 * scale;
+      const ty = oy + 3 * scale + (f ? 1 : 0);
+      drawSprite(ctx, tailSprite, tx, ty, Math.floor(scale * 0.8), getTintForStage(G));
+    }
+    if (traits.tentacles > 0 && G.stage >= 4) {
+      const t = TRAIT_SPRITES.tentacle;
+      const n = Math.min(traits.tentacles, 2);
+      for (let i = 0; i < n; i++) {
+        const tx = ox + (i === 0 ? -scale * 2 : 6 * scale);
+        drawSprite(ctx, t, tx, oy + 4 * scale, Math.floor(scale * 0.6), getTintForStage(G));
+      }
+    }
+  }
+
   window.KrakendorkSprites = {
     SPRITES,
     COLORS,
     STAGE_TINTS,
+    TRAIT_SPRITES,
     drawSprite,
     getSpriteForState,
-    getTintForStage
+    getTintForStage,
+    drawTraitOverlay
   };
 })(window);

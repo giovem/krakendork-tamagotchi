@@ -4,6 +4,27 @@ Registro de cambios del proyecto Krakendork.
 
 ---
 
+## [2025-03-23] - Todas las mejoras aplicadas
+
+### Cambios
+- **localStorage**: Guardado automático cada 10s, carga al iniciar
+- **Page Visibility API**: Krakendork duerme cuando la pestaña está oculta, despierta al volver
+- **Teclado**: A/← = SELECT, B/M = MENU, C/→ = EXEC
+- **Vibración**: En móvil al pulsar botones y caricias
+- **Sonidos retro**: Beeps (Web Audio) en botones, comer, ganar/perder
+- **Caricias**: Tap en la zona del creature para acariciar (+felicidad)
+- **Nombre personalizado**: Editable en panel Estado
+- **Logros**: Contadores en Estado (alimentaciones, victorias, limpiezas)
+- **4 minijuegos**: Izq/Der, Simón dice, Adivina número, Reflejos
+- **Evolución infinita**: Etapas 6-7 (Krakendork+, Gran Krakendork), rasgos cola/tentáculos
+- **Sprites San Bernardo**: Paleta blanco/marrón por etapa
+- **Rasgos visuales**: Cola peluda y tentáculos según evolución
+- **PWA**: manifest.json + Service Worker para offline
+- **Tutorial**: Overlay inicial con instrucciones
+- **Nuevo huevo**: Opción para reiniciar desde panel Estado
+
+---
+
 ## [2025-03-23] - Refactor diseño + framework de animaciones
 
 ### Cambios

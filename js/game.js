@@ -7,6 +7,9 @@
   const UI = window.KrakendorkUI;
   const Engine = window.KrakendorkEngine;
   const Sprites = window.KrakendorkSprites;
+  const Storage = window.KrakendorkStorage;
+  const Audio = window.KrakendorkAudio;
+  const Input = window.KrakendorkInput;
   const $ = UI.$;
 
   let G = {};
@@ -17,20 +20,35 @@
   const C = () => document.getElementById('creature-canvas');
   const ctx = () => C() && C().getContext('2d');
 
-  function initGame() {
-    G = {
+  function getDefaultState() {
+    return {
       hunger: 80, happy: 80, energy: 80, clean: 80, weight: 5,
       age: 0, stage: 0, health: 100, sick: false, sickTime: 0, dead: false, deepSleep: false,
       neglectHunger: 0, neglectHappy: 0,
       dayTick: 0, tick: 0,
       sleeping: false, autoLight: true, poop: false, poopCount: 0,
-      happyCount: 0,
+      happyCount: 0, name: 'Krakendork',
+      feedCount: 0, gameWins: 0, cleanCount: 0,
       menuOpen: false, menuSel: 0, statsOpen: false, gameOpen: false,
       hatching: true, hatchTick: 0,
       frame: 0, walkDir: 1, walkX: 0, mood: 'happy',
-      miniGame: null,
-      needsAttention: false,
+      miniGame: null, needsAttention: false,
+      traits: { tail: 0, tentacles: 0, extraEyes: 0 },
     };
+  }
+
+  function initGame(forceNew = false) {
+    if (Engine && Engine.stopGameLoop) Engine.stopGameLoop();
+    if (forceNew && Storage && Storage.clearSave) Storage.clearSave();
+    const saved = !forceNew && Storage && Storage.load();
+    if (saved && saved.stage > 0) {
+      G = Object.assign(getDefaultState(), saved);
+      G.hatching = false;
+      G.miniGame = null;
+      if (!G.traits) G.traits = { tail: 0, tentacles: 0, extraEyes: 0 };
+    } else {
+      G = getDefaultState();
+    }
 
     const c = C();
     if (c) {
@@ -43,12 +61,50 @@
     if (ds) ds.style.display = 'none';
     G.deepSleep = false;
     const sb = $('status-bars');
-    if (sb) sb.style.opacity = '0';
+    if (sb) sb.style.opacity = G.stage > 0 ? '1' : '0';
     const sbot = $('screen-bottom');
     if (sbot) sbot.style.display = 'flex';
 
-    Engine.startGameLoop(update, render);
-    UI.showMsg('Un huevo misterioso... 🥚', 2500);
+    if (saved && saved.stage > 0) {
+      Engine.startGameLoop(update, render);
+      UI.showMsg('¡Bienvenido de nuevo, ' + (G.name || 'Krakendork') + '!', 2000);
+    } else {
+      Engine.startGameLoop(update, render);
+      UI.showMsg('Un huevo misterioso... 🥚', 2500);
+    }
+
+    if (window.KrakendorkVisibility) {
+      KrakendorkVisibility.init(
+        () => {
+          if (G.stage > 0 && !G.deepSleep) {
+            G.sleeping = true;
+            const z1 = $('sleep-z'), z2 = $('sleep-z2');
+            if (z1) z1.style.display = 'block';
+            if (z2) z2.style.display = 'block';
+          }
+        },
+        () => {
+          if (G.stage > 0 && G.sleeping) {
+            G.sleeping = false;
+            const z1 = $('sleep-z'), z2 = $('sleep-z2');
+            if (z1) z1.style.display = 'none';
+            if (z2) z2.style.display = 'none';
+            UI.showMsg('¡' + (G.name || 'Krakendork') + ' despertó! 😊', 2000);
+          }
+        }
+      );
+    }
+    if (Input) Input.initPetting($('creature-area') || C(), onPet);
+  }
+
+  function onPet() {
+    if (G.dead || G.hatching || G.deepSleep || G.gameOpen) return;
+    if (G.sleeping) { UI.showMsg('¡Está dormido!', 800); return; }
+    G.happy = Math.min(100, G.happy + 8);
+    UI.showEffect('💕');
+    UI.showMsg('¡Qué rico! 🐕', 800);
+    if (Audio) Audio.eatBeep();
+    if (Input) Input.vibrate(20);
   }
 
   function update(dt) {
@@ -146,6 +202,8 @@
     }
 
     if (G.happy > 70 && G.hunger > 50 && G.tick % 30 === 0) G.happyCount++;
+
+    if (Storage) Storage.scheduleSave(G);
   }
 
   function render(alpha) {
@@ -181,6 +239,7 @@
     }
 
     Sprites.drawSprite(cx, sprite, ox, oy, scale, tint);
+    if (Sprites.drawTraitOverlay) Sprites.drawTraitOverlay(cx, G, ox, oy, scale);
 
     if (G.hatching && G.hatchTick > 60) {
       cx.fillStyle = tint[1];
@@ -212,11 +271,14 @@
   }
 
   function checkEvolution() {
-    const stages = [0, 1, 3, 6, 12, 20];
-    const names = ['','San Bernardo bebé','San Bernardo joven','Con cola peluda','Tentáculos de pulpo','Krakendork'];
+    const stages = [0, 1, 3, 6, 12, 20, 30, 50];
+    const names = ['','San Bernardo bebé','San Bernardo joven','Con cola peluda','Tentáculos de pulpo','Krakendork','Krakendork+','Gran Krakendork'];
     for (let i = stages.length - 1; i >= 0; i--) {
-      if (G.age >= stages[i] && G.stage < i + 1 && i + 1 <= 5) {
+      if (G.age >= stages[i] && G.stage < i + 1 && i + 1 <= 7) {
         G.stage = i + 1;
+        if (!G.traits) G.traits = { tail: 0, tentacles: 0, extraEyes: 0 };
+        if (i >= 2) G.traits.tail = Math.min(2, (G.traits.tail || 0) + 1);
+        if (i >= 4) G.traits.tentacles = Math.min(4, (G.traits.tentacles || 0) + 1);
         UI.evolutionFlash();
         UI.showMsg('¡Evolucionó a ' + names[G.stage] + '!', 2500);
         break;
@@ -273,9 +335,11 @@
     G.hunger = Math.min(100, G.hunger + 30);
     G.weight += 0.5;
     G.clean = Math.max(0, G.clean - 5);
+    G.feedCount = (G.feedCount || 0) + 1;
     UI.showEffect('🍙');
     UI.showMsg('¡Ñam ñam!', 1000);
     UI.spawnFood('🍙');
+    if (Audio) Audio.eatBeep();
   }
 
   function feedSnack() {
@@ -283,9 +347,11 @@
     G.hunger = Math.min(100, G.hunger + 15);
     G.happy = Math.min(100, G.happy + 15);
     G.weight += 1;
+    G.feedCount = (G.feedCount || 0) + 1;
     UI.showEffect('🍬');
     UI.showMsg('¡Dulce! 😋', 1000);
     UI.spawnFood('🍬');
+    if (Audio) Audio.eatBeep();
   }
 
   function startMiniGame() {
@@ -294,21 +360,150 @@
     const ga = $('game-area');
     if (ga) ga.style.display = 'flex';
 
-    const target = Math.random() < 0.5 ? '⬅️' : '➡️';
-    G.miniGame = { target, answered: false };
+    const games = ['leftRight', 'simon', 'number', 'reflex'];
+    const pick = games[Math.floor(Math.random() * games.length)];
 
-    const gp = $('game-prompt');
-    const gt = $('game-target');
-    const gr = $('game-result');
-    const gi = $('game-input');
+    if (pick === 'leftRight') startLeftRightGame();
+    else if (pick === 'simon') startSimonGame();
+    else if (pick === 'number') startNumberGame();
+    else startReflexGame();
+  }
+
+  function startLeftRightGame() {
+    const target = Math.random() < 0.5 ? '⬅️' : '➡️';
+    G.miniGame = { type: 'leftRight', target, answered: false };
+    const gp = $('game-prompt'), gt = $('game-target'), gr = $('game-result'), gi = $('game-input');
     if (gp) gp.textContent = '¿Izq o Der?';
     if (gt) gt.textContent = '❓';
     if (gr) gr.textContent = '';
     if (gi) gi.innerHTML = `<div class="game-btn" onclick="Krakendork.answerGame('left')">⬅️</div><div class="game-btn" onclick="Krakendork.answerGame('right')">➡️</div>`;
   }
 
+  function startSimonGame() {
+    const seq = ['🔴','🟢','🔵','🟡'];
+    const len = 3 + Math.floor(Math.random() * 2);
+    const pattern = [];
+    for (let i = 0; i < len; i++) pattern.push(seq[Math.floor(Math.random() * 4)]);
+    G.miniGame = { type: 'simon', pattern, step: 0, showing: true, answered: false };
+    const gp = $('game-prompt'), gt = $('game-target'), gr = $('game-result'), gi = $('game-input');
+    if (gp) gp.textContent = '¡Simón dice! Repite la secuencia';
+    if (gt) gt.textContent = pattern[0];
+    if (gr) gr.textContent = '';
+    if (gi) gi.innerHTML = seq.map((s,i)=>`<div class="game-btn" onclick="Krakendork.answerSimon(${i})">${s}</div>`).join('');
+    let idx = 0;
+    const iv = setInterval(() => {
+      idx++;
+      if (idx >= pattern.length) { clearInterval(iv); G.miniGame.showing = false; return; }
+      if (gt) gt.textContent = pattern[idx];
+    }, 600);
+  }
+
+  function answerSimon(idx) {
+    if (!G.miniGame || G.miniGame.type !== 'simon' || G.miniGame.showing || G.miniGame.answered) return;
+    const seq = ['🔴','🟢','🔵','🟡'];
+    const expected = G.miniGame.pattern[G.miniGame.step];
+    const chosen = seq[idx];
+    if (chosen !== expected) {
+      G.miniGame.answered = true;
+      G.happy = Math.max(0, G.happy - 5);
+      G.energy = Math.max(0, G.energy - 10);
+      if ($('game-result')) $('game-result').textContent = 'Perdiste...';
+      if (Audio) Audio.failBeep();
+      setTimeout(() => { G.gameOpen = false; if ($('game-area')) $('game-area').style.display = 'none'; }, 1500);
+      return;
+    }
+    G.miniGame.step++;
+    if (G.miniGame.step >= G.miniGame.pattern.length) {
+      G.miniGame.answered = true;
+      G.happy = Math.min(100, G.happy + 25);
+      G.energy = Math.max(0, G.energy - 10);
+      G.happyCount++; G.gameWins = (G.gameWins || 0) + 1;
+      if ($('game-result')) $('game-result').textContent = '¡Perfecto! +25😊';
+      UI.showHearts();
+      if (Audio) Audio.successBeep();
+      setTimeout(() => { G.gameOpen = false; if ($('game-area')) $('game-area').style.display = 'none'; }, 1500);
+    }
+  }
+
+  function startNumberGame() {
+    const target = 1 + Math.floor(Math.random() * 9);
+    G.miniGame = { type: 'number', target, answered: false };
+    const gp = $('game-prompt'), gt = $('game-target'), gr = $('game-result'), gi = $('game-input');
+    if (gp) gp.textContent = '¿Qué número es? (1-9)';
+    if (gt) gt.textContent = '❓';
+    if (gr) gr.textContent = '';
+    const nums = [1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5).slice(0,6);
+    if (gi) gi.innerHTML = nums.map(n=>`<div class="game-btn" onclick="Krakendork.answerNumber(${n})">${n}</div>`).join('');
+  }
+
+  function answerNumber(n) {
+    if (!G.miniGame || G.miniGame.type !== 'number' || G.miniGame.answered) return;
+    G.miniGame.answered = true;
+    const gt = $('game-target'), gr = $('game-result');
+    if (gt) gt.textContent = G.miniGame.target;
+    const correct = n === G.miniGame.target;
+    if (correct) {
+      G.happy = Math.min(100, G.happy + 25);
+      G.energy = Math.max(0, G.energy - 10);
+      G.happyCount++; G.gameWins = (G.gameWins || 0) + 1;
+      if (gr) gr.textContent = '¡Correcto! +25😊';
+      UI.showHearts();
+      if (Audio) Audio.successBeep();
+    } else {
+      G.happy = Math.max(0, G.happy - 5);
+      G.energy = Math.max(0, G.energy - 10);
+      if (gr) gr.textContent = 'Era ' + G.miniGame.target;
+      if (Audio) Audio.failBeep();
+    }
+    setTimeout(() => { G.gameOpen = false; if ($('game-area')) $('game-area').style.display = 'none'; }, 1500);
+  }
+
+  function startReflexGame() {
+    G.miniGame = { type: 'reflex', startTime: null, answered: false };
+    const gp = $('game-prompt'), gt = $('game-target'), gr = $('game-result'), gi = $('game-input');
+    if (gp) gp.textContent = '¡Espera... Toca cuando veas GO!';
+    if (gt) gt.textContent = '...';
+    if (gr) gr.textContent = '';
+    if (gi) gi.innerHTML = '<div class="game-btn" id="reflex-btn" style="width:80px">Esperar</div>';
+    const delay = 1500 + Math.random() * 2000;
+    setTimeout(() => {
+      if (!G.miniGame || G.miniGame.answered) return;
+      G.miniGame.startTime = Date.now();
+      const btn = $('reflex-btn');
+      if (btn) { btn.textContent = '¡GO!'; btn.onclick = () => answerReflex(); }
+      if (gt) gt.textContent = '¡AHORA!';
+    }, delay);
+  }
+
+  function answerReflex() {
+    if (!G.miniGame || G.miniGame.type !== 'reflex' || G.miniGame.answered) return;
+    G.miniGame.answered = true;
+    const elapsed = G.miniGame.startTime ? Date.now() - G.miniGame.startTime : 0;
+    const gt = $('game-target'), gr = $('game-result');
+    if (gt) gt.textContent = elapsed + 'ms';
+    const good = elapsed < 500 && elapsed > 50;
+    if (good) {
+      G.happy = Math.min(100, G.happy + 30);
+      G.energy = Math.max(0, G.energy - 10);
+      G.happyCount++; G.gameWins = (G.gameWins || 0) + 1;
+      if (gr) gr.textContent = '¡Increíble! +30😊';
+      UI.showHearts();
+      if (Audio) Audio.successBeep();
+    } else if (elapsed < 100) {
+      G.happy = Math.max(0, G.happy - 10);
+      if (gr) gr.textContent = '¡Muy pronto!';
+      if (Audio) Audio.failBeep();
+    } else {
+      G.happy = Math.min(100, G.happy + 15);
+      G.energy = Math.max(0, G.energy - 10);
+      if (gr) gr.textContent = 'Bien: ' + elapsed + 'ms';
+    }
+    setTimeout(() => { G.gameOpen = false; if ($('game-area')) $('game-area').style.display = 'none'; }, 1500);
+  }
+
   function answerGame(choice) {
     if (!G.miniGame || G.miniGame.answered) return;
+    if (G.miniGame.type && G.miniGame.type !== 'leftRight') return;
     G.miniGame.answered = true;
 
     const correct = (choice === 'left' && G.miniGame.target === '⬅️') || (choice === 'right' && G.miniGame.target === '➡️');
@@ -320,12 +515,15 @@
       G.happy = Math.min(100, G.happy + 25);
       G.energy = Math.max(0, G.energy - 10);
       G.happyCount++;
+      G.gameWins = (G.gameWins || 0) + 1;
       if (gr) gr.textContent = '¡Ganaste! +25😊';
       UI.showHearts();
+      if (Audio) Audio.successBeep();
     } else {
       G.happy = Math.max(0, G.happy - 5);
       G.energy = Math.max(0, G.energy - 10);
       if (gr) gr.textContent = 'Perdiste...';
+      if (Audio) Audio.failBeep();
     }
 
     setTimeout(() => {
@@ -336,9 +534,17 @@
   }
 
   function handleGameInput(btn) {
-    if (btn === 'A') answerGame('left');
-    else if (btn === 'C') answerGame('right');
-    else if (btn === 'B') {
+    if (G.miniGame && G.miniGame.type === 'simon') {
+      if (btn === 'A') answerSimon(0);
+      else if (btn === 'B') answerSimon(1);
+      else if (btn === 'C') answerSimon(2);
+      return;
+    }
+    if (G.miniGame && G.miniGame.type === 'leftRight') {
+      if (btn === 'A') answerGame('left');
+      else if (btn === 'C') answerGame('right');
+    }
+    if (btn === 'B') {
       G.gameOpen = false;
       const ga = $('game-area');
       if (ga) ga.style.display = 'none';
@@ -374,6 +580,7 @@
   function cleanUp() {
     if (G.clean >= 90 && !G.poop) { UI.showMsg('¡Ya está limpio!', 1200); return; }
     G.clean = 100;
+    G.cleanCount = (G.cleanCount || 0) + 1;
     if (G.poop) {
       G.poop = false;
       const pi = $('poop-icon');
@@ -405,6 +612,18 @@
     t('ps-age', G.age);
     t('ps-hc', G.happyCount);
     t('ps-sick', G.sick ? '⚕️ ENFERMO' : '');
+    const ach = $('ps-achievements');
+    if (ach) ach.innerHTML = '🍙' + (G.feedCount||0) + ' 🎮' + (G.gameWins||0) + ' 🛁' + (G.cleanCount||0);
+    const nameInput = $('ps-name');
+    if (nameInput) nameInput.value = G.name || 'Krakendork';
+  }
+
+  function setName(name) {
+    const n = (name || '').trim();
+    if (n.length > 0 && n.length <= 12) {
+      G.name = n;
+      UI.showMsg('¡Te llamas ' + G.name + '!', 1500);
+    }
   }
 
   function closeStats() {
@@ -414,6 +633,8 @@
   }
 
   function pressA() {
+    if (Audio) Audio.btnBeep();
+    if (Input) Input.vibrate(15);
     if (G.dead || G.hatching) return;
     if (G.deepSleep) { wakeFromSleep(); return; }
     if (G.gameOpen) { handleGameInput('A'); return; }
@@ -425,6 +646,8 @@
   }
 
   function pressB() {
+    if (Audio) Audio.btnBeep();
+    if (Input) Input.vibrate(15);
     if (G.dead || G.hatching) return;
     if (G.deepSleep) { wakeFromSleep(); return; }
     if (G.gameOpen) { handleGameInput('B'); return; }
@@ -438,6 +661,8 @@
   }
 
   function pressC() {
+    if (Audio) Audio.btnBeep();
+    if (Input) Input.vibrate(15);
     if (G.dead || G.hatching) return;
     if (G.deepSleep) { wakeFromSleep(); return; }
     if (G.gameOpen) { handleGameInput('C'); return; }
@@ -465,7 +690,11 @@
     pressC,
     selectMenu,
     answerGame,
+    answerSimon,
+    answerNumber,
+    answerReflex,
     wakeFromSleep,
     closeStats,
+    setName,
   };
 })(window);
