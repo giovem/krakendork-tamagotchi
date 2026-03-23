@@ -239,7 +239,7 @@
     }
 
     if (!G.sleeping && G.stage > 0) {
-      cx.fillStyle = 'rgba(0,50,0,0.3)';
+      cx.fillStyle = 'rgba(60,58,53,0.25)';
       cx.beginPath();
       cx.ellipse(ox + sw/2, oy + sh + 2, sw/3, 3, 0, 0, Math.PI*2);
       cx.fill();

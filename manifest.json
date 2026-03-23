@@ -4,8 +4,8 @@
   "description": "Mascota virtual San Bernardo + Kraken",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1a0a1e",
-  "theme_color": "#9b5fa5",
+  "background_color": "#2c2a28",
+  "theme_color": "#2c2a28",
   "orientation": "portrait",
   "icons": [
     {

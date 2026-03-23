@@ -4,6 +4,18 @@ Registro de cambios del proyecto Krakendork.
 
 ---
 
+## [2025-03-23] - Diseño sobrio, solo pantalla de juego
+
+### Cambios
+- **Colores sobrios**: Paleta grises/marrones apagados
+- **Sin figura Tamagotchi**: Eliminada la carcasa, solo la pantalla destaca
+- **Fondo oscuro neutro** (#2c2a28)
+- **Botones planos** en lugar de 3D
+- **Ocultos**: estrellas, shell-deco
+- **Sprites** adaptados a la paleta sobria
+
+---
+
 ## [2025-03-23] - Fix bugs e incoherencias
 
 ### Correcciones

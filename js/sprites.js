@@ -69,16 +69,16 @@
     ],
   };
 
-  const COLORS = { 1: '#0f380f', 2: '#306230', 3: '#8bac0f', 0: null };
+  const COLORS = { 1: '#3d3a35', 2: '#6b6862', 3: '#9a978f', 0: null };
 
-  // San Bernardo: blanco/marrón. Pulpo: tonos más oscuros en etapas avanzadas
+  // Paleta sobria: grises y marrones apagados
   const STAGE_TINTS = [
-    {1:'#0f380f', 2:'#6a6a6a', 3:'#c8c8c8'},           // egg - gris
-    {1:'#4a3020', 2:'#8b6914', 3:'#f5e6d3'},           // baby - San Bernardo (marrón/blanco)
-    {1:'#4a3020', 2:'#8b6914', 3:'#f5e6d3'},           // child
-    {1:'#3d2817', 2:'#7a5512', 3:'#e8d4b8'},           // teen - máscara más oscura
-    {1:'#2d1f10', 2:'#5a3d0a', 3:'#d4c4a8'},           // adult - más definido
-    {1:'#1a1208', 2:'#3d2a08', 3:'#a89878'},           // elder/krakendork
+    {1:'#3d3a35', 2:'#6b6862', 3:'#9a978f'},           // egg
+    {1:'#4a4540', 2:'#7a756e', 3:'#b5b0a8'},           // baby
+    {1:'#4a4540', 2:'#7a756e', 3:'#b5b0a8'},           // child
+    {1:'#3d3833', 2:'#6b6660', 3:'#a09b92'},           // teen
+    {1:'#35302c', 2:'#5a5550', 3:'#8a857d'},           // adult
+    {1:'#2a2622', 2:'#4a4540', 3:'#6b6660'},           // elder/krakendork
   ];
 
   // Rasgos: cola peluda, tentáculos (sprites overlay)
