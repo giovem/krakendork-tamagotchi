@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TamaGochi 🥚</title>
+<title>Krakendork 🐕🦑</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -270,7 +270,7 @@
   .game-btn:active { background: var(--pixel); }
   .game-result { font-size: 8px; color: var(--pixel); }
 
-  /* Overlay dead */
+  /* Overlay sueño profundo (no hay muerte en Krakendork) */
   .dead-screen {
     position: absolute; inset: 0; z-index: 30;
     background: var(--screen-bg);
@@ -507,12 +507,12 @@
       <!-- Evo flash -->
       <div class="evo-flash" id="evo-flash"></div>
 
-      <!-- Dead screen -->
+      <!-- Sueño profundo (Krakendork no muere, solo duerme) -->
       <div class="dead-screen" id="dead-screen">
-        <div class="ghost">👻</div>
-        <div class="dead-text">Tu mascota<br>partió al más<br>allá...</div>
-        <div class="dead-text" id="dead-age" style="font-size:6px"></div>
-        <button class="restart-btn" onclick="restartGame()">Nuevo huevo</button>
+        <div class="ghost">💤</div>
+        <div class="dead-text">Krakendork<br>duerme profundamente...</div>
+        <div class="dead-text" id="dead-age" style="font-size:6px">Toca Luz para despertar</div>
+        <button class="restart-btn" onclick="wakeFromSleep()">Despertar</button>
       </div>
     </div>
   </div>
@@ -568,6 +568,7 @@ function initGame() {
     sick: false,
     sickTime: 0,
     dead: false,
+    deepSleep: false,   // Krakendork no muere, solo duerme
     
     // Neglect counters
     neglectHunger: 0,
@@ -612,11 +613,12 @@ function initGame() {
   
   hideAll();
   document.getElementById('dead-screen').style.display = 'none';
+  G.deepSleep = false;
   document.getElementById('status-bars').style.opacity = '0';
   document.getElementById('screen-bottom') && (document.getElementById('screen-bottom').style.display='flex');
   
   startLoop();
-  showMsg('Un huevo misterioso...', 2500);
+  showMsg('Un huevo misterioso... 🥚', 2500);
 }
 
 function hideAll() {
@@ -881,6 +883,17 @@ function startLoop() {
 
 function gameTick() {
   if(G.dead) return;
+  if(G.deepSleep) {
+    // En sueño profundo: recuperar stats lentamente
+    if(G.tick % 10 === 0) {
+      G.hunger = Math.min(50, G.hunger + 2);
+      G.energy = Math.min(70, G.energy + 5);
+      G.health = Math.min(50, G.health + 3);
+    }
+    drawCreature();
+    updateClock();
+    return;
+  }
   
   G.frame++;
   const now = Date.now();
@@ -896,7 +909,7 @@ function gameTick() {
       G.stage = 1;
       document.getElementById('status-bars').style.opacity = '1';
       evolutionFlash();
-      showMsg('¡Nació tu Tama!', 2000);
+      showMsg('¡Nació Krakendork! 🐕', 2000);
     }
     drawCreature();
     updateClock();
@@ -971,20 +984,20 @@ function gameTick() {
       if(Math.random() < 0.1) {
         G.sick = true;
         document.getElementById('sick-overlay').style.display = 'flex';
-        showMsg('¡Tu Tama se enfermó!', 2000);
+        showMsg('¡Krakendork se enfermó!', 2000);
         triggerAttention();
       }
     }
     
-    // Sick: auto-recover if health good enough, else die
+    // Sick + sin salud: duerme (Krakendork no muere)
     if(G.sick && G.health <= 0) {
-      die();
+      enterDeepSleep();
       return;
     }
     
-    // Die from starvation
+    // Hambre extrema: duerme (Krakendork no muere)
     if(G.hunger <= 0 && G.neglectHunger > 20) {
-      die();
+      enterDeepSleep();
       return;
     }
     
@@ -1036,7 +1049,7 @@ function checkPoopRandom() {
     G.poopCount++;
     document.getElementById('poop-icon').style.display = 'block';
     triggerAttention();
-    showMsg('¡Tu Tama hizo pipí!', 1500);
+    showMsg('¡Krakendork hizo pipí!', 1500);
   }
 }
 
@@ -1046,7 +1059,7 @@ function checkEvolution() {
     if(G.age >= stages[i] && G.stage < i+1 && i+1 <= 5) {
       G.stage = i+1;
       evolutionFlash();
-      const names = ['','Bebé','Niño','Teen','Adulto','Anciano'];
+      const names = ['','Cachorro','Perro joven','Con cola','Con tentáculos','Krakendork'];
       showMsg('¡Evolucionó a ' + names[G.stage] + '!', 2500);
       break;
     }
@@ -1064,12 +1077,21 @@ function evolutionFlash() {
   }, 150);
 }
 
-function die() {
-  G.dead = true;
+function enterDeepSleep() {
+  G.deepSleep = true;
   document.getElementById('dead-screen').style.display = 'flex';
-  document.getElementById('dead-age').textContent = 
-    'Vivió ' + G.age + ' días\nFue feliz ' + G.happyCount + ' veces';
-  if(loopId) clearInterval(loopId);
+  document.getElementById('dead-age').textContent = 'Toca Luz para despertar';
+}
+
+function wakeFromSleep() {
+  G.deepSleep = false;
+  document.getElementById('dead-screen').style.display = 'none';
+  G.hunger = Math.min(100, G.hunger + 30);
+  G.energy = Math.min(100, G.energy + 40);
+  G.health = Math.min(100, G.health + 50);
+  if(G.sick) G.sick = false;
+  document.getElementById('sick-overlay').style.display = 'none';
+  showMsg('¡Krakendork despertó! 😊', 2000);
 }
 
 function restartGame() {
@@ -1087,6 +1109,7 @@ let menuOpen = false;
 function pressA() {
   // Select/navigate
   if(G.dead || G.hatching) return;
+  if(G.deepSleep) { wakeFromSleep(); return; }
   
   if(G.gameOpen) { handleGameInput('A'); return; }
   if(G.statsOpen) { closeStats(); return; }
@@ -1100,6 +1123,7 @@ function pressA() {
 function pressB() {
   // Menu toggle
   if(G.dead || G.hatching) return;
+  if(G.deepSleep) { wakeFromSleep(); return; }
   if(G.gameOpen) { handleGameInput('B'); return; }
   if(G.statsOpen) { closeStats(); return; }
   
@@ -1116,6 +1140,7 @@ function pressB() {
 function pressC() {
   // Execute
   if(G.dead || G.hatching) return;
+  if(G.deepSleep) { wakeFromSleep(); return; }
   if(G.gameOpen) { handleGameInput('C'); return; }
   if(G.statsOpen) { closeStats(); return; }
   
@@ -1238,6 +1263,7 @@ function handleGameInput(btn) {
 }
 
 function toggleLight() {
+  if(G.deepSleep) { wakeFromSleep(); return; }
   G.sleeping = !G.sleeping;
   if(G.sleeping) {
     document.getElementById('sleep-z').style.display = 'block';
