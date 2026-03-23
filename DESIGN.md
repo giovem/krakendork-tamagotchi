@@ -4,10 +4,26 @@
 
 **Krakendork** es una mascota virtual personal inspirada en la fusión de:
 
-- **Murdock** — mascota perro del creador
-- **Kraken** — bestia mitológica del mar
+- **Murdock** — mascota del creador, **San Bernardo**: perro grande, peludo, manchas blancas y marrones, cara bondadosa y orejas caídas
+- **Kraken** — **pulpo gigante** del mar: 8 tentáculos, ventosas, cuerpo de cefalópodo
 
-El resultado: un ser que comienza como perro y evoluciona con rasgos de kraken (tentáculos, múltiples ojos, tamaño creciente), manteniendo siempre un espíritu divertido y creativo.
+El resultado: un ser que comienza como cachorro San Bernardo y evoluciona con rasgos de pulpo gigante (tentáculos con ventosas, múltiples ojos, tamaño creciente), manteniendo un espíritu divertido y creativo.
+
+---
+
+## Referencias visuales
+
+### San Bernardo (base del cuerpo)
+- Cuerpo grande y robusto
+- Pelaje blanco con manchas marrón/rojizo (común: máscara oscura, orejas marrones)
+- Orejas caídas, cara amable
+- Patas anchas y peludas
+
+### Pulpo gigante (rasgos kraken)
+- 8 brazos/tentáculos
+- Ventosas (círculos) en cada tentáculo
+- Cabeza bulbosa (manto)
+- Ojos grandes y expresivos
 
 ---
 
@@ -15,7 +31,7 @@ El resultado: un ser que comienza como perro y evoluciona con rasgos de kraken (
 
 1. **No muere** — Nunca hay game over. Si las estadísticas caen mucho o el usuario está inactivo, Krakendork simplemente **duerme**. Al volver, se despierta.
 2. **Evolución casi infinita** — Crece y cambia sin límite claro en el tiempo.
-3. **Base: perro** — Después del huevo, la forma base es un perro (como Murdock).
+3. **Base: San Bernardo** — Después del huevo, la forma base es un perro San Bernardo (como Murdock).
 
 ---
 
@@ -38,11 +54,11 @@ El resultado: un ser que comienza como perro y evoluciona con rasgos de kraken (
 ```
 
 ### Rasgos que se agregan con el tiempo
-- **Colas** — Una o más
-- **Tentáculos** — Como el kraken
-- **Ojos** — Múltiples ojos
-- **Tamaño** — Crece con la edad
-- Ideas futuras: aletas, escamas, variaciones de color, etc.
+- **Cola** — Cola de San Bernardo (peluda, gruesa)
+- **Tentáculos** — Como el pulpo gigante: 8 brazos con ventosas, que emergen progresivamente
+- **Ojos** — Múltiples ojos de pulpo (grandes, expresivos)
+- **Tamaño** — Crece con la edad (San Bernardo es grande)
+- Ideas futuras: manto de pulpo, variaciones de color pelaje/manchas
 
 ---
 
@@ -69,7 +85,7 @@ El resultado: un ser que comienza como perro y evoluciona con rasgos de kraken (
 ---
 
 ## Roadmap (ideas)
-- [ ] Sprites de perro (base Murdock)
+- [ ] Sprites de San Bernardo (base Murdock: pelaje blanco/marrón, orejas caídas)
 - [ ] Sistema de rasgos acumulativos (colas, tentáculos, ojos)
 - [ ] Detección de inactividad (Page Visibility API)
 - [ ] Persistencia (localStorage)

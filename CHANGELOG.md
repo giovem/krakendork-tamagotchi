@@ -4,6 +4,15 @@ Registro de cambios del proyecto Krakendork.
 
 ---
 
+## [2025-03-23] - Krakendork: San Bernardo + pulpo gigante
+
+### Cambios
+- **Referencias**: Murdock = San Bernardo (pelaje blanco/marrón, orejas caídas). Kraken = pulpo gigante (8 tentáculos, ventosas)
+- **DESIGN.md**: Nueva sección de referencias visuales para sprites futuros
+- **Evolución**: Etapas renombradas a San Bernardo bebé → San Bernardo joven → Con cola peluda → Tentáculos de pulpo → Krakendork
+
+---
+
 ## [2025-03-23] - Krakendork: concepto y mecánicas base
 
 ### Cambios
