@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TamaGochi 🥚</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  :root {
+    --shell: #e8b4d8;
+    --shell-dark: #c48ab4;
+    --shell-light: #f5d4ec;
+    --btn: #9b5fa5;
+    --btn-shadow: #6a3a72;
+    --screen-bg: #8bac0f;
+    --screen-dark: #306230;
+    --screen-mid: #8bac0f;
+    --screen-light: #9bbc0f;
+    --pixel: #0f380f;
+    --pixel-mid: #306230;
+    --bg: #1a0a1e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    background-image: radial-gradient(ellipse at 30% 20%, #2d0a3e 0%, transparent 60%),
+                      radial-gradient(ellipse at 70% 80%, #0a1a3e 0%, transparent 60%);
+  }
+
+  /* Stars */
+  .stars { position:fixed; inset:0; pointer-events:none; }
+  .star { position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; animation: twinkle 3s infinite; }
+  @keyframes twinkle { 0%,100%{opacity:.2} 50%{opacity:1} }
+
+  /* Device */
+  .device {
+    position: relative;
+    width: min(340px, 92vw);
+    background: var(--shell);
+    border-radius: 50% 50% 40% 40% / 40% 40% 30% 30%;
+    padding: 28px 24px 60px;
+    box-shadow:
+      inset 0 -8px 0 var(--shell-dark),
+      inset 0 4px 0 var(--shell-light),
+      0 20px 60px rgba(0,0,0,0.8),
+      0 0 0 3px var(--shell-dark);
+    user-select: none;
+  }
+
+  .device::before {
+    content: '';
+    position: absolute;
+    top: 14px; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 12px;
+    background: var(--shell-light);
+    border-radius: 6px;
+    opacity: 0.5;
+  }
+
+  /* Screen */
+  .screen-frame {
+    background: #2a1a1a;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.8), 0 2px 0 rgba(255,255,255,0.1);
+    margin-bottom: 22px;
+  }
+
+  .screen {
+    background: var(--screen-bg);
+    border-radius: 6px;
+    width: 100%;
+    aspect-ratio: 1.4 / 1;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,50,0,0.4);
+  }
+
+  .screen-scanlines {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none; z-index: 10;
+  }
+
+  /* Status bars */
+  .status-bars {
+    position: absolute;
+    top: 6px; left: 6px; right: 6px;
+    display: flex; flex-direction: column; gap: 3px;
+    z-index: 5;
+  }
+
+  .stat-row {
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .stat-icon { font-size: 7px; line-height: 1; width: 10px; text-align: center; }
+
+  .stat-bar-bg {
+    flex: 1; height: 5px;
+    background: var(--screen-dark);
+    border-radius: 0;
+    image-rendering: pixelated;
+  }
+
+  .stat-bar-fill {
+    height: 100%;
+    background: var(--pixel);
+    transition: width 0.5s;
+  }
+
+  /* Main creature area */
+  .creature-area {
+    position: absolute;
+    top: 38px; left: 0; right: 0; bottom: 28px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Bottom screen info */
+  .screen-bottom {
+    position: absolute;
+    bottom: 4px; left: 6px; right: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 5;
+  }
+
+  .age-display { font-size: 6px; color: var(--pixel); }
+  .time-display { font-size: 6px; color: var(--pixel); }
+
+  /* Pixel creature canvas */
+  #creature-canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  /* Message bubble */
+  .msg-bubble {
+    position: absolute;
+    top: 36px; left: 6px; right: 6px;
+    background: var(--screen-light);
+    border: 2px solid var(--pixel);
+    padding: 4px 6px;
+    font-size: 6px;
+    color: var(--pixel);
+    line-height: 1.6;
+    z-index: 8;
+    display: none;
+    image-rendering: pixelated;
+  }
+
+  /* Attention indicator */
+  .attention {
+    position: absolute;
+    top: 4px; right: 8px;
+    font-size: 10px;
+    animation: blink 0.8s infinite;
+    z-index: 9;
+    display: none;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* Effect layer */
+  .effect-layer {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 7;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* Buttons */
+  .buttons-row {
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .btn {
+    width: 42px; height: 42px;
+    background: var(--btn);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    box-shadow: 0 5px 0 var(--btn-shadow), 0 6px 0 rgba(0,0,0,0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1;
+    text-align: center;
+    position: relative;
+    -webkit-user-select: none;
+  }
+
+  .btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 var(--btn-shadow), 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  .btn-icon { font-size: 14px; }
+  .btn-label { font-size: 5px; opacity: 0.9; }
+
+  /* Menu */
+  .menu-overlay {
+    position: absolute; inset: 0;
+    background: var(--screen-bg);
+    z-index: 20;
+    display: none;
+    flex-direction: column;
+    padding: 8px 6px;
+    gap: 3px;
+  }
+
+  .menu-title {
+    font-size: 7px; color: var(--pixel);
+    text-align: center; margin-bottom: 4px;
+    border-bottom: 2px solid var(--pixel);
+    padding-bottom: 3px;
+  }
+
+  .menu-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 4px;
+    font-size: 7px; color: var(--pixel);
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+
+  .menu-item.selected { border-color: var(--pixel); background: var(--screen-dark); color: var(--screen-light); }
+  .menu-item:active { background: var(--screen-dark); }
+
+  /* Sick overlay */
+  .sick-overlay {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 6;
+    display: none;
+    align-items: center; justify-content: center;
+  }
+
+  /* Game area */
+  .game-area {
+    position: absolute; inset: 0; z-index: 15;
+    background: var(--screen-bg);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px;
+  }
+
+  .game-prompt { font-size: 8px; color: var(--pixel); text-align: center; }
+  .game-target { font-size: 24px; }
+  .game-input { display: flex; gap: 8px; }
+  .game-btn {
+    width: 36px; height: 36px; background: var(--screen-dark);
+    border: 2px solid var(--pixel); font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .game-btn:active { background: var(--pixel); }
+  .game-result { font-size: 8px; color: var(--pixel); }
+
+  /* Overlay dead */
+  .dead-screen {
+    position: absolute; inset: 0; z-index: 30;
+    background: var(--screen-bg);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .dead-screen .ghost { font-size: 28px; animation: float 2s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .dead-text { font-size: 7px; color: var(--pixel); text-align: center; line-height: 2; }
+  .restart-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px; padding: 6px 10px;
+    background: var(--pixel); color: var(--screen-light);
+    border: none; cursor: pointer; margin-top: 4px;
+  }
+
+  /* Notification dot */
+  .notif {
+    position: absolute; top: 0; right: 0;
+    width: 8px; height: 8px; background: #ff4444;
+    border-radius: 50%; display: none;
+  }
+
+  /* Shell decoration */
+  .shell-deco {
+    position: absolute;
+    bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px;
+  }
+
+  .deco-dot {
+    width: 8px; height: 8px;
+    background: var(--shell-dark);
+    border-radius: 50%;
+  }
+
+  /* Pixel walking animation */
+  @keyframes walk { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+  @keyframes bounce { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.9) scaleX(1.05)} }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+  /* Food animation */
+  .food-item {
+    position: absolute;
+    font-size: 16px;
+    animation: fall 1s forwards;
+    pointer-events: none;
+  }
+  @keyframes fall { 0%{top:20%;opacity:1} 100%{top:60%;opacity:0} }
+
+  /* Hearts */
+  .heart-particle {
+    position: absolute;
+    font-size: 10px;
+    animation: rise 1s forwards;
+    pointer-events: none;
+  }
+  @keyframes rise { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-40px);opacity:0} }
+
+  /* sleep Z */
+  .sleep-z {
+    position: absolute;
+    top: 20%; right: 28%;
+    font-size: 8px; color: var(--pixel);
+    font-family: 'Press Start 2P', monospace;
+    animation: sleepZ 2s infinite;
+  }
+  @keyframes sleepZ { 0%{opacity:0;transform:translate(0,0) scale(0.5)} 50%{opacity:1} 100%{opacity:0;transform:translate(8px,-12px) scale(1)} }
+
+  /* Poop */
+  .poop-icon {
+    position: absolute;
+    bottom: 30%; right: 20%;
+    font-size: 12px;
+    animation: blink 2s infinite;
+  }
+
+  /* Evolution flash */
+  .evo-flash {
+    position: absolute; inset: 0;
+    background: white;
+    z-index: 25; pointer-events: none;
+    display: none;
+  }
+
+  /* Stats panel */
+  .stats-panel {
+    position: absolute; inset: 0; z-index: 20;
+    background: var(--screen-bg);
+    display: none; flex-direction: column;
+    padding: 6px; gap: 4px;
+  }
+
+  .panel-title { font-size: 7px; color: var(--pixel); text-align: center; margin-bottom: 2px; }
+
+  .panel-stat {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .panel-stat-label { font-size: 6px; color: var(--pixel); width: 45px; }
+  .panel-stat-bar { flex: 1; height: 8px; background: var(--screen-dark); }
+  .panel-stat-val { font-size: 6px; color: var(--pixel); width: 20px; text-align: right; }
+
+  /* Medal */
+  .medal { position: absolute; top: 4px; left: 6px; font-size: 10px; z-index: 5; }
+
+  /* Responsive small */
+  @media (max-height: 600px) {
+    .device { padding: 20px 20px 50px; }
+    .btn { width: 36px; height: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="device">
+  <!-- Screen -->
+  <div class="screen-frame">
+    <div class="screen" id="main-screen">
+      <div class="screen-scanlines"></div>
+
+      <!-- Status bars top -->
+      <div class="status-bars" id="status-bars">
+        <div class="stat-row">
+          <span class="stat-icon">🍔</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-hunger" style="width:80%"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-icon">😊</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-happy" style="width:80%"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-icon">🔋</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-energy" style="width:80%"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-icon">🚿</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-clean" style="width:80%"></div></div>
+        </div>
+      </div>
+
+      <!-- Medals / status icons -->
+      <div class="medal" id="medal-icon" style="display:none"></div>
+
+      <!-- Attention blink -->
+      <div class="attention" id="attention">❗</div>
+
+      <!-- Creature area -->
+      <div class="creature-area">
+        <canvas id="creature-canvas" width="64" height="48"></canvas>
+      </div>
+
+      <!-- Sleep Zs -->
+      <div class="sleep-z" id="sleep-z" style="display:none">z</div>
+      <div class="sleep-z" id="sleep-z2" style="display:none; animation-delay:1s; right:22%; font-size:10px">Z</div>
+
+      <!-- Poop indicator -->
+      <div class="poop-icon" id="poop-icon" style="display:none">💩</div>
+
+      <!-- Message bubble -->
+      <div class="msg-bubble" id="msg-bubble"></div>
+
+      <!-- Effect layer -->
+      <div class="effect-layer" id="effect-layer"></div>
+
+      <!-- Screen bottom info -->
+      <div class="screen-bottom">
+        <div class="age-display" id="age-display">Día 0</div>
+        <div class="time-display" id="time-display">12:00</div>
+      </div>
+
+      <!-- Overlays -->
+      <div class="menu-overlay" id="menu-overlay">
+        <div class="menu-title">MENÚ</div>
+        <div class="menu-item" id="mi-food" onclick="selectMenu('food')"><span>🍙</span> Alimentar</div>
+        <div class="menu-item" id="mi-snack" onclick="selectMenu('snack')"><span>🍬</span> Golosina</div>
+        <div class="menu-item" id="mi-game" onclick="selectMenu('game')"><span>🎮</span> Jugar</div>
+        <div class="menu-item" id="mi-light" onclick="selectMenu('light')"><span>💡</span> Luz</div>
+        <div class="menu-item" id="mi-medicine" onclick="selectMenu('medicine')"><span>💊</span> Medicina</div>
+        <div class="menu-item" id="mi-clean" onclick="selectMenu('clean')"><span>🛁</span> Limpiar</div>
+        <div class="menu-item" id="mi-stats" onclick="selectMenu('stats')"><span>📊</span> Estado</div>
+      </div>
+
+      <!-- Stats panel -->
+      <div class="stats-panel" id="stats-panel">
+        <div class="panel-title">📊 ESTADO</div>
+        <div class="panel-stat">
+          <span class="panel-stat-label">HAMBRE</span>
+          <div class="panel-stat-bar" id="ps-hunger-bg"><div style="height:100%;background:var(--pixel);transition:width .3s" id="ps-hunger"></div></div>
+          <span class="panel-stat-val" id="psv-hunger">80</span>
+        </div>
+        <div class="panel-stat">
+          <span class="panel-stat-label">FELIZ</span>
+          <div class="panel-stat-bar"><div style="height:100%;background:var(--pixel);transition:width .3s" id="ps-happy"></div></div>
+          <span class="panel-stat-val" id="psv-happy">80</span>
+        </div>
+        <div class="panel-stat">
+          <span class="panel-stat-label">ENERGÍA</span>
+          <div class="panel-stat-bar"><div style="height:100%;background:var(--pixel);transition:width .3s" id="ps-energy"></div></div>
+          <span class="panel-stat-val" id="psv-energy">80</span>
+        </div>
+        <div class="panel-stat">
+          <span class="panel-stat-label">LIMPIEZA</span>
+          <div class="panel-stat-bar"><div style="height:100%;background:var(--pixel);transition:width .3s" id="ps-clean"></div></div>
+          <span class="panel-stat-val" id="psv-clean">80</span>
+        </div>
+        <div class="panel-stat">
+          <span class="panel-stat-label">PESO</span>
+          <div class="panel-stat-bar"><div style="height:100%;background:var(--pixel)" id="ps-weight"></div></div>
+          <span class="panel-stat-val" id="psv-weight">5</span>
+        </div>
+        <div class="panel-stat" style="margin-top:2px">
+          <span class="panel-stat-label" style="width:auto;font-size:6px">Edad: <span id="ps-age">0</span>d &nbsp; Felices: <span id="ps-hc">0</span> &nbsp; </span>
+          <span class="panel-stat-label" id="ps-sick" style="color:#f44;font-size:6px"></span>
+        </div>
+        <div style="margin-top:4px;text-align:center;font-size:6px;color:var(--pixel);cursor:pointer;text-decoration:underline" onclick="closeStats()">[ cerrar ]</div>
+      </div>
+
+      <!-- Game area -->
+      <div class="game-area" id="game-area">
+        <div class="game-prompt" id="game-prompt">¡Adivina!</div>
+        <div class="game-target" id="game-target">❓</div>
+        <div class="game-input" id="game-input"></div>
+        <div class="game-result" id="game-result"></div>
+      </div>
+
+      <!-- Sick overlay -->
+      <div class="sick-overlay" id="sick-overlay">
+        <span style="font-size:12px;animation:blink 1s infinite">💀</span>
+      </div>
+
+      <!-- Evo flash -->
+      <div class="evo-flash" id="evo-flash"></div>
+
+      <!-- Dead screen -->
+      <div class="dead-screen" id="dead-screen">
+        <div class="ghost">👻</div>
+        <div class="dead-text">Tu mascota<br>partió al más<br>allá...</div>
+        <div class="dead-text" id="dead-age" style="font-size:6px"></div>
+        <button class="restart-btn" onclick="restartGame()">Nuevo huevo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="buttons-row">
+    <button class="btn" id="btn-a" onclick="pressA()">
+      <span class="btn-icon">A</span>
+      <span class="btn-label">SELECT</span>
+    </button>
+    <button class="btn" id="btn-b" onclick="pressB()">
+      <span class="btn-icon">B</span>
+      <span class="btn-label">MENU</span>
+    </button>
+    <button class="btn" id="btn-c" onclick="pressC()">
+      <span class="btn-icon">C</span>
+      <span class="btn-label">EXEC</span>
+    </button>
+  </div>
+
+  <div class="shell-deco">
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+  </div>
+</div>
+
+<script>
+// ========================
+// TAMAGOTCHI ENGINE
+// ========================
+
+const C = document.getElementById('creature-canvas');
+const ctx = C.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// Game state
+let G = {};
+
+function initGame() {
+  G = {
+    // Core stats 0-100
+    hunger: 80,   // satiety (low = hungry)
+    happy: 80,
+    energy: 80,
+    clean: 80,
+    weight: 5,
+    
+    // Life
+    age: 0,         // days
+    stage: 0,       // 0=egg, 1=baby, 2=child, 3=teen, 4=adult, 5=elder
+    health: 100,
+    sick: false,
+    sickTime: 0,
+    dead: false,
+    
+    // Neglect counters
+    neglectHunger: 0,
+    neglectHappy: 0,
+    
+    // Game
+    dayTick: 0,     // ticks per day (120 ticks = 1 day)
+    tick: 0,
+    lastTick: Date.now(),
+    
+    // State
+    sleeping: false,
+    autoLight: true,
+    poop: false,
+    poopCount: 0,
+    
+    // Metrics
+    happyCount: 0,   // how many times was happy
+    
+    // Menu
+    menuOpen: false,
+    menuSel: 0,
+    statsOpen: false,
+    gameOpen: false,
+    
+    // Hatch
+    hatching: true,
+    hatchTick: 0,
+    
+    // Animation
+    frame: 0,
+    walkDir: 1,
+    walkX: 0,
+    mood: 'happy',
+    
+    // Game mini
+    miniGame: null,
+    
+    // Notification
+    needsAttention: false,
+  };
+  
+  hideAll();
+  document.getElementById('dead-screen').style.display = 'none';
+  document.getElementById('status-bars').style.opacity = '0';
+  document.getElementById('screen-bottom') && (document.getElementById('screen-bottom').style.display='flex');
+  
+  startLoop();
+  showMsg('Un huevo misterioso...', 2500);
+}
+
+function hideAll() {
+  document.getElementById('menu-overlay').style.display = 'none';
+  document.getElementById('stats-panel').style.display = 'none';
+  document.getElementById('game-area').style.display = 'none';
+  document.getElementById('sick-overlay').style.display = 'none';
+  document.getElementById('evo-flash').style.display = 'none';
+}
+
+// ========================
+// PIXEL ART SPRITES
+// ========================
+
+// Each sprite is a 2D pixel array [rows][cols]
+// 0=transparent, 1=darkest, 2=mid, 3=light
+
+const SPRITES = {
+  egg: [
+    [0,0,1,1,1,0,0],
+    [0,1,2,2,2,1,0],
+    [1,2,2,3,2,2,1],
+    [1,2,3,2,2,2,1],
+    [1,2,2,2,2,2,1],
+    [0,1,2,2,2,1,0],
+    [0,0,1,1,1,0,0],
+  ],
+  egg_crack: [
+    [0,0,1,1,1,0,0],
+    [0,1,2,1,2,1,0],
+    [1,2,1,3,2,2,1],
+    [1,2,3,1,2,2,1],
+    [1,2,2,2,1,2,1],
+    [0,1,2,2,1,1,0],
+    [0,0,1,1,1,0,0],
+  ],
+  // Baby - tiny blob
+  baby: [
+    [0,1,1,1,0],
+    [1,2,3,2,1],
+    [1,2,2,2,1],
+    [1,1,2,1,1],
+    [0,1,1,1,0],
+  ],
+  baby2: [
+    [0,1,1,1,0],
+    [1,2,2,2,1],
+    [1,3,2,3,1],
+    [1,2,2,2,1],
+    [0,1,1,1,0],
+  ],
+  // Child - small round
+  child: [
+    [0,0,1,1,1,0,0],
+    [0,1,2,2,2,1,0],
+    [1,2,1,3,1,2,1],
+    [1,2,2,2,2,2,1],
+    [0,1,2,3,2,1,0],
+    [0,0,1,2,1,0,0],
+    [0,1,0,0,0,1,0],
+  ],
+  child2: [
+    [0,0,1,1,1,0,0],
+    [0,1,2,2,2,1,0],
+    [1,2,1,2,1,2,1],
+    [1,2,2,2,2,2,1],
+    [0,1,3,2,3,1,0],
+    [0,0,1,2,1,0,0],
+    [0,1,0,0,0,1,0],
+  ],
+  // Teen - medium
+  teen: [
+    [0,1,1,1,1,1,0],
+    [1,2,2,2,2,2,1],
+    [1,2,1,3,1,2,1],
+    [1,2,1,3,1,2,1],
+    [1,2,2,3,2,2,1],
+    [0,1,2,2,2,1,0],
+    [0,1,0,0,0,1,0],
+    [1,1,0,0,0,1,1],
+  ],
+  teen2: [
+    [0,1,1,1,1,1,0],
+    [1,2,2,2,2,2,1],
+    [1,2,2,3,2,2,1],
+    [1,2,1,2,1,2,1],
+    [1,2,2,2,2,2,1],
+    [0,1,3,2,3,1,0],
+    [0,1,0,0,0,1,0],
+    [1,1,0,0,0,1,1],
+  ],
+  // Adult - larger
+  adult: [
+    [0,0,1,1,1,1,0,0],
+    [0,1,2,2,2,2,1,0],
+    [1,2,2,2,2,2,2,1],
+    [1,2,1,3,3,1,2,1],
+    [1,2,1,2,2,1,2,1],
+    [1,2,2,3,3,2,2,1],
+    [0,1,2,2,2,2,1,0],
+    [0,1,0,1,1,0,1,0],
+    [1,1,0,1,1,0,1,1],
+  ],
+  adult2: [
+    [0,0,1,1,1,1,0,0],
+    [0,1,2,2,2,2,1,0],
+    [1,2,2,2,2,2,2,1],
+    [1,2,2,3,3,2,2,1],
+    [1,2,1,2,2,1,2,1],
+    [1,2,2,2,2,2,2,1],
+    [0,1,3,2,2,3,1,0],
+    [0,1,0,1,1,0,1,0],
+    [1,1,0,1,1,0,1,1],
+  ],
+  // Elder
+  elder: [
+    [0,1,1,1,1,1,1,0],
+    [1,2,2,2,2,2,2,1],
+    [1,2,1,1,1,1,2,1],
+    [1,2,1,3,3,1,2,1],
+    [1,2,3,2,2,3,2,1],
+    [1,2,2,1,1,2,2,1],
+    [0,1,2,2,2,2,1,0],
+    [0,1,1,0,0,1,1,0],
+    [0,1,0,0,0,0,1,0],
+  ],
+  // Sick
+  sick_face: [
+    [0,0,1,1,1,0,0],
+    [0,1,2,2,2,1,0],
+    [1,2,1,2,1,2,1],
+    [1,2,2,1,2,2,1],
+    [1,2,1,2,1,2,1],
+    [0,1,2,2,2,1,0],
+    [0,0,1,1,1,0,0],
+  ],
+  // Sleep
+  sleep_face: [
+    [0,0,1,1,1,0,0],
+    [0,1,2,2,2,1,0],
+    [1,2,1,1,1,2,1],
+    [1,2,2,2,2,2,1],
+    [1,2,2,1,2,2,1],
+    [0,1,2,2,2,1,0],
+    [0,0,1,1,1,0,0],
+  ],
+  // Sad
+  sad_face: [
+    [0,0,1,1,1,0,0],
+    [0,1,2,2,2,1,0],
+    [1,2,1,2,1,2,1],
+    [1,2,2,2,2,2,1],
+    [1,2,1,2,1,2,1],
+    [0,1,2,1,2,1,0],
+    [0,0,1,1,1,0,0],
+  ],
+};
+
+const COLORS = {
+  1: '#0f380f',
+  2: '#306230',
+  3: '#8bac0f',
+  0: null
+};
+
+// Stage-specific palette tints
+const STAGE_TINTS = [
+  {1:'#0f380f', 2:'#6a6a6a', 3:'#c8c8c8'}, // egg - gray
+  {1:'#0f380f', 2:'#5a3060', 3:'#c08acc'},  // baby - purple
+  {1:'#0f380f', 2:'#1a5050', 3:'#5ac8c8'},  // child - teal
+  {1:'#0f380f', 2:'#4a3a00', 3:'#c8a800'},  // teen - gold
+  {1:'#0f380f', 2:'#1a3a1a', 3:'#5acc5a'},  // adult - green
+  {1:'#0f380f', 2:'#3a1a00', 3:'#c87a00'},  // elder - orange
+];
+
+function drawSprite(sprite, ox, oy, scale=4, tint=null) {
+  const colors = tint || COLORS;
+  for(let r=0; r<sprite.length; r++) {
+    for(let c=0; c<sprite[r].length; c++) {
+      const v = sprite[r][c];
+      if(v === 0) continue;
+      ctx.fillStyle = colors[v];
+      ctx.fillRect(ox + c*scale, oy + r*scale, scale, scale);
+    }
+  }
+}
+
+function getSprite() {
+  const f = Math.floor(G.frame / 20) % 2; // frame cycle
+  const stage = G.stage;
+  
+  if(stage === 0) return f ? SPRITES.egg : SPRITES.egg_crack;
+  
+  if(G.sleeping) return SPRITES.sleep_face;
+  if(G.sick) return SPRITES.sick_face;
+  
+  const hungry = G.hunger < 25;
+  const sad = G.happy < 25;
+  
+  if(hungry || sad) return SPRITES.sad_face;
+  
+  if(stage === 1) return f ? SPRITES.baby : SPRITES.baby2;
+  if(stage === 2) return f ? SPRITES.child : SPRITES.child2;
+  if(stage === 3) return f ? SPRITES.teen : SPRITES.teen2;
+  if(stage === 4) return f ? SPRITES.adult : SPRITES.adult2;
+  return f ? SPRITES.elder : SPRITES.adult2;
+}
+
+function getTint() {
+  return STAGE_TINTS[Math.min(G.stage, 5)];
+}
+
+function drawCreature() {
+  ctx.clearRect(0, 0, C.width, C.height);
+  
+  const sprite = getSprite();
+  const tint = getTint();
+  
+  // Center
+  const scale = G.stage >= 4 ? 4 : G.stage >= 2 ? 5 : G.stage === 0 ? 5 : 6;
+  const sw = sprite[0].length * scale;
+  const sh = sprite.length * scale;
+  
+  let ox = Math.floor((C.width - sw) / 2);
+  let oy = Math.floor((C.height - sh) / 2);
+  
+  // Walking offset for non-sleeping
+  if(!G.sleeping && !G.hatching && G.stage > 0) {
+    ox += Math.floor(G.walkX);
+    
+    // Bounce
+    if(G.frame % 20 < 10) oy += 1;
+  }
+  
+  // Shadow
+  if(!G.sleeping && G.stage > 0) {
+    ctx.fillStyle = 'rgba(0,50,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(ox + sw/2, oy + sh + 2, sw/3, 3, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+  
+  drawSprite(sprite, ox, oy, scale, tint);
+  
+  // Egg crack animation during hatch
+  if(G.hatching && G.hatchTick > 60) {
+    ctx.fillStyle = tint[1];
+    ctx.fillRect(ox + sw/2 - 1, oy, 2, sh);
+  }
+}
+
+// ========================
+// GAME LOOP
+// ========================
+
+let loopId = null;
+
+function startLoop() {
+  if(loopId) clearInterval(loopId);
+  loopId = setInterval(gameTick, 50); // 20 fps
+}
+
+function gameTick() {
+  if(G.dead) return;
+  
+  G.frame++;
+  const now = Date.now();
+  const dt = (now - G.lastTick) / 1000;
+  G.lastTick = now;
+  
+  // Hatch sequence
+  if(G.hatching) {
+    G.hatchTick++;
+    if(G.hatchTick === 60) showMsg('¡El huevo se mueve!', 1500);
+    if(G.hatchTick >= 120) {
+      G.hatching = false;
+      G.stage = 1;
+      document.getElementById('status-bars').style.opacity = '1';
+      evolutionFlash();
+      showMsg('¡Nació tu Tama!', 2000);
+    }
+    drawCreature();
+    updateClock();
+    return;
+  }
+  
+  // Walk animation
+  if(!G.sleeping) {
+    G.walkX += 0.4 * G.walkDir;
+    const maxWalk = 12;
+    if(G.walkX > maxWalk) G.walkDir = -1;
+    if(G.walkX < -maxWalk) G.walkDir = 1;
+  }
+  
+  // Tick every real second = 1 game tick
+  G.tick++;
+  
+  // Day cycle: 120 ticks = 1 game day
+  G.dayTick++;
+  if(G.dayTick >= 120) {
+    G.dayTick = 0;
+    G.age++;
+    checkEvolution();
+    checkPoopRandom();
+  }
+  
+  // Auto sleep: after age 1, sleep at "night"
+  if(G.autoLight && G.stage > 1) {
+    const gameHour = Math.floor((G.dayTick / 120) * 24);
+    if(gameHour >= 22 || gameHour < 7) {
+      if(!G.sleeping) {
+        G.sleeping = true;
+        document.getElementById('sleep-z').style.display = 'block';
+        document.getElementById('sleep-z2').style.display = 'block';
+      }
+    } else {
+      if(G.sleeping) {
+        G.sleeping = false;
+        document.getElementById('sleep-z').style.display = 'none';
+        document.getElementById('sleep-z2').style.display = 'none';
+      }
+    }
+  }
+  
+  // Stat decay (every 5 ticks)
+  if(G.tick % 5 === 0) {
+    if(!G.sleeping) {
+      G.hunger = Math.max(0, G.hunger - 1.5);
+      G.happy = Math.max(0, G.happy - 1);
+      G.clean = Math.max(0, G.clean - 0.8);
+    } else {
+      // Recover energy while sleeping
+      G.energy = Math.min(100, G.energy + 3);
+    }
+    
+    if(!G.sleeping) {
+      G.energy = Math.max(0, G.energy - 0.5);
+    }
+    
+    // Sick drains health
+    if(G.sick) {
+      G.health = Math.max(0, G.health - 2);
+      G.sickTime++;
+    }
+    
+    // Neglect tracking
+    if(G.hunger < 20) G.neglectHunger++;
+    if(G.happy < 20) G.neglectHappy++;
+    
+    // Critical: get sick from neglect
+    if(!G.sick && (G.hunger < 10 || G.clean < 10)) {
+      if(Math.random() < 0.1) {
+        G.sick = true;
+        document.getElementById('sick-overlay').style.display = 'flex';
+        showMsg('¡Tu Tama se enfermó!', 2000);
+        triggerAttention();
+      }
+    }
+    
+    // Sick: auto-recover if health good enough, else die
+    if(G.sick && G.health <= 0) {
+      die();
+      return;
+    }
+    
+    // Die from starvation
+    if(G.hunger <= 0 && G.neglectHunger > 20) {
+      die();
+      return;
+    }
+    
+    // Attention check
+    checkAttention();
+    
+    updateBars();
+  }
+  
+  // Happy count
+  if(G.happy > 70 && G.hunger > 50) {
+    if(G.tick % 30 === 0) G.happyCount++;
+  }
+  
+  drawCreature();
+  updateClock();
+}
+
+function updateClock() {
+  // Simulate time based on dayTick
+  const pct = G.dayTick / 120;
+  const h = Math.floor(pct * 24);
+  const m = Math.floor((pct * 24 - h) * 60);
+  document.getElementById('time-display').textContent = 
+    String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  document.getElementById('age-display').textContent = 'Día ' + G.age;
+}
+
+function updateBars() {
+  document.getElementById('bar-hunger').style.width = G.hunger + '%';
+  document.getElementById('bar-happy').style.width = G.happy + '%';
+  document.getElementById('bar-energy').style.width = G.energy + '%';
+  document.getElementById('bar-clean').style.width = G.clean + '%';
+}
+
+function checkAttention() {
+  const needsAttn = G.hunger < 30 || G.happy < 30 || G.energy < 20 || G.sick || G.poop;
+  document.getElementById('attention').style.display = needsAttn ? 'block' : 'none';
+  G.needsAttention = needsAttn;
+}
+
+function triggerAttention() {
+  document.getElementById('attention').style.display = 'block';
+}
+
+function checkPoopRandom() {
+  if(G.stage > 1 && Math.random() < 0.4) {
+    G.poop = true;
+    G.poopCount++;
+    document.getElementById('poop-icon').style.display = 'block';
+    triggerAttention();
+    showMsg('¡Tu Tama hizo pipí!', 1500);
+  }
+}
+
+function checkEvolution() {
+  const stages = [0, 1, 3, 6, 12, 20];
+  for(let i = stages.length-1; i >= 0; i--) {
+    if(G.age >= stages[i] && G.stage < i+1 && i+1 <= 5) {
+      G.stage = i+1;
+      evolutionFlash();
+      const names = ['','Bebé','Niño','Teen','Adulto','Anciano'];
+      showMsg('¡Evolucionó a ' + names[G.stage] + '!', 2500);
+      break;
+    }
+  }
+}
+
+function evolutionFlash() {
+  const fl = document.getElementById('evo-flash');
+  fl.style.display = 'block';
+  let n = 0;
+  const iv = setInterval(() => {
+    fl.style.opacity = n%2 === 0 ? '1' : '0';
+    n++;
+    if(n > 6) { clearInterval(iv); fl.style.display = 'none'; }
+  }, 150);
+}
+
+function die() {
+  G.dead = true;
+  document.getElementById('dead-screen').style.display = 'flex';
+  document.getElementById('dead-age').textContent = 
+    'Vivió ' + G.age + ' días\nFue feliz ' + G.happyCount + ' veces';
+  if(loopId) clearInterval(loopId);
+}
+
+function restartGame() {
+  initGame();
+}
+
+// ========================
+// BUTTON CONTROLS
+// ========================
+
+let menuItems = ['food','snack','game','light','medicine','clean','stats'];
+let currentMenu = 0;
+let menuOpen = false;
+
+function pressA() {
+  // Select/navigate
+  if(G.dead || G.hatching) return;
+  
+  if(G.gameOpen) { handleGameInput('A'); return; }
+  if(G.statsOpen) { closeStats(); return; }
+  
+  if(menuOpen) {
+    currentMenu = (currentMenu + 1) % menuItems.length;
+    highlightMenu();
+  }
+}
+
+function pressB() {
+  // Menu toggle
+  if(G.dead || G.hatching) return;
+  if(G.gameOpen) { handleGameInput('B'); return; }
+  if(G.statsOpen) { closeStats(); return; }
+  
+  menuOpen = !menuOpen;
+  const mo = document.getElementById('menu-overlay');
+  if(menuOpen) {
+    mo.style.display = 'flex';
+    highlightMenu();
+  } else {
+    mo.style.display = 'none';
+  }
+}
+
+function pressC() {
+  // Execute
+  if(G.dead || G.hatching) return;
+  if(G.gameOpen) { handleGameInput('C'); return; }
+  if(G.statsOpen) { closeStats(); return; }
+  
+  if(menuOpen) {
+    executeMenu(menuItems[currentMenu]);
+    menuOpen = false;
+    document.getElementById('menu-overlay').style.display = 'none';
+  }
+}
+
+function selectMenu(item) {
+  menuOpen = false;
+  document.getElementById('menu-overlay').style.display = 'none';
+  executeMenu(item);
+}
+
+function highlightMenu() {
+  menuItems.forEach((item, i) => {
+    document.getElementById('mi-' + item).className = 
+      'menu-item' + (i === currentMenu ? ' selected' : '');
+  });
+}
+
+function executeMenu(action) {
+  if(G.sleeping && action !== 'light' && action !== 'stats') {
+    showMsg('¡Está dormido!', 1200);
+    return;
+  }
+  
+  switch(action) {
+    case 'food': feedMeal(); break;
+    case 'snack': feedSnack(); break;
+    case 'game': startMiniGame(); break;
+    case 'light': toggleLight(); break;
+    case 'medicine': giveMedicine(); break;
+    case 'clean': cleanUp(); break;
+    case 'stats': openStats(); break;
+  }
+}
+
+// ========================
+// ACTIONS
+// ========================
+
+function feedMeal() {
+  if(G.hunger >= 100) { showMsg('¡No tiene hambre!', 1200); return; }
+  G.hunger = Math.min(100, G.hunger + 30);
+  G.weight += 0.5;
+  G.clean = Math.max(0, G.clean - 5);
+  showEffect('🍙');
+  showMsg('¡Ñam ñam!', 1000);
+  spawnFood('🍙');
+}
+
+function feedSnack() {
+  if(G.hunger >= 100) { showMsg('¡No tiene hambre!', 1200); return; }
+  G.hunger = Math.min(100, G.hunger + 15);
+  G.happy = Math.min(100, G.happy + 15);
+  G.weight += 1;
+  showEffect('🍬');
+  showMsg('¡Dulce! 😋', 1000);
+  spawnFood('🍬');
+}
+
+function startMiniGame() {
+  if(G.energy < 15) { showMsg('¡Está muy cansado!', 1200); return; }
+  G.gameOpen = true;
+  const ga = document.getElementById('game-area');
+  ga.style.display = 'flex';
+  
+  // Random game: guess left or right
+  const target = Math.random() < 0.5 ? '⬅️' : '➡️';
+  G.miniGame = { target, answered: false };
+  
+  document.getElementById('game-prompt').textContent = '¿Izq o Der?';
+  document.getElementById('game-target').textContent = '❓';
+  document.getElementById('game-result').textContent = '';
+  
+  const gi = document.getElementById('game-input');
+  gi.innerHTML = `
+    <div class="game-btn" onclick="answerGame('left')">⬅️</div>
+    <div class="game-btn" onclick="answerGame('right')">➡️</div>
+  `;
+}
+
+function answerGame(choice) {
+  if(!G.miniGame || G.miniGame.answered) return;
+  G.miniGame.answered = true;
+  
+  const correct = (choice === 'left' && G.miniGame.target === '⬅️') ||
+                  (choice === 'right' && G.miniGame.target === '➡️');
+  
+  document.getElementById('game-target').textContent = G.miniGame.target;
+  
+  if(correct) {
+    G.happy = Math.min(100, G.happy + 25);
+    G.energy = Math.max(0, G.energy - 10);
+    G.happyCount++;
+    document.getElementById('game-result').textContent = '¡Ganaste! +25😊';
+    showHearts();
+  } else {
+    G.happy = Math.max(0, G.happy - 5);
+    G.energy = Math.max(0, G.energy - 10);
+    document.getElementById('game-result').textContent = 'Perdiste...';
+  }
+  
+  setTimeout(() => {
+    G.gameOpen = false;
+    document.getElementById('game-area').style.display = 'none';
+  }, 1500);
+}
+
+function handleGameInput(btn) {
+  if(btn === 'A') answerGame('left');
+  else if(btn === 'C') answerGame('right');
+  else if(btn === 'B') {
+    G.gameOpen = false;
+    document.getElementById('game-area').style.display = 'none';
+  }
+}
+
+function toggleLight() {
+  G.sleeping = !G.sleeping;
+  if(G.sleeping) {
+    document.getElementById('sleep-z').style.display = 'block';
+    document.getElementById('sleep-z2').style.display = 'block';
+    showMsg('Buenas noches... 💤', 1200);
+  } else {
+    document.getElementById('sleep-z').style.display = 'none';
+    document.getElementById('sleep-z2').style.display = 'none';
+    showMsg('¡Buenos días! ☀️', 1200);
+  }
+}
+
+function giveMedicine() {
+  if(!G.sick) { showMsg('¡Está sano!', 1200); return; }
+  G.sick = false;
+  G.health = Math.min(100, G.health + 50);
+  G.sickTime = 0;
+  document.getElementById('sick-overlay').style.display = 'none';
+  showEffect('💊');
+  showMsg('¡Se curó! 💪', 1500);
+}
+
+function cleanUp() {
+  if(G.clean >= 90 && !G.poop) { showMsg('¡Ya está limpio!', 1200); return; }
+  G.clean = 100;
+  if(G.poop) {
+    G.poop = false;
+    document.getElementById('poop-icon').style.display = 'none';
+  }
+  showEffect('🛁');
+  showMsg('¡Limpio y fresquito!', 1200);
+  checkAttention();
+}
+
+function openStats() {
+  G.statsOpen = true;
+  const sp = document.getElementById('stats-panel');
+  sp.style.display = 'flex';
+  
+  document.getElementById('ps-hunger').style.width = G.hunger + '%';
+  document.getElementById('ps-happy').style.width = G.happy + '%';
+  document.getElementById('ps-energy').style.width = G.energy + '%';
+  document.getElementById('ps-clean').style.width = G.clean + '%';
+  const wPct = Math.min(100, (G.weight / 30) * 100);
+  document.getElementById('ps-weight').style.width = wPct + '%';
+  
+  document.getElementById('psv-hunger').textContent = Math.round(G.hunger);
+  document.getElementById('psv-happy').textContent = Math.round(G.happy);
+  document.getElementById('psv-energy').textContent = Math.round(G.energy);
+  document.getElementById('psv-clean').textContent = Math.round(G.clean);
+  document.getElementById('psv-weight').textContent = Math.round(G.weight);
+  
+  document.getElementById('ps-age').textContent = G.age;
+  document.getElementById('ps-hc').textContent = G.happyCount;
+  document.getElementById('ps-sick').textContent = G.sick ? '⚕️ ENFERMO' : '';
+}
+
+function closeStats() {
+  G.statsOpen = false;
+  document.getElementById('stats-panel').style.display = 'none';
+}
+
+// ========================
+// VISUAL EFFECTS
+// ========================
+
+function showMsg(text, dur) {
+  const mb = document.getElementById('msg-bubble');
+  mb.textContent = text;
+  mb.style.display = 'block';
+  clearTimeout(mb._t);
+  mb._t = setTimeout(() => { mb.style.display = 'none'; }, dur || 1500);
+}
+
+function showEffect(emoji) {
+  const el = document.getElementById('effect-layer');
+  const span = document.createElement('span');
+  span.textContent = emoji;
+  span.style.cssText = 'font-size:20px;animation:rise 0.8s forwards;pointer-events:none';
+  el.appendChild(span);
+  setTimeout(() => span.remove(), 800);
+}
+
+function spawnFood(emoji) {
+  const screen = document.getElementById('main-screen');
+  const fi = document.createElement('div');
+  fi.className = 'food-item';
+  fi.textContent = emoji;
+  fi.style.left = (30 + Math.random() * 40) + '%';
+  screen.appendChild(fi);
+  setTimeout(() => fi.remove(), 1000);
+}
+
+function showHearts() {
+  const el = document.getElementById('effect-layer');
+  for(let i=0; i<4; i++) {
+    setTimeout(() => {
+      const h = document.createElement('span');
+      h.className = 'heart-particle';
+      h.textContent = '♥';
+      h.style.cssText = `font-size:10px;color:#c04040;position:absolute;left:${25+Math.random()*50}%;top:50%;animation:rise 1s forwards;pointer-events:none`;
+      el.appendChild(h);
+      setTimeout(() => h.remove(), 1000);
+    }, i * 150);
+  }
+}
+
+// ========================
+// STARS BG
+// ========================
+
+function initStars() {
+  const sc = document.getElementById('stars');
+  for(let i=0; i<40; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+    sc.appendChild(s);
+  }
+}
+
+// ========================
+// INIT
+// ========================
+
+initStars();
+initGame();
+</script>
+</body>
+</html>
