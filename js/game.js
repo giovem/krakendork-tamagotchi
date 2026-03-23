@@ -46,6 +46,13 @@
       G.hatching = false;
       G.miniGame = null;
       if (!G.traits) G.traits = { tail: 0, tentacles: 0, extraEyes: 0 };
+      const z1 = $('sleep-z'), z2 = $('sleep-z2');
+      if (z1) z1.style.display = G.sleeping ? 'block' : 'none';
+      if (z2) z2.style.display = G.sleeping ? 'block' : 'none';
+      const pi = $('poop-icon');
+      if (pi) pi.style.display = G.poop ? 'block' : 'none';
+      const so = $('sick-overlay');
+      if (so) so.style.display = G.sick ? 'flex' : 'none';
     } else {
       G = getDefaultState();
     }
@@ -74,7 +81,7 @@
     }
 
     if (window.KrakendorkVisibility) {
-      KrakendorkVisibility.init(
+      window.KrakendorkVisibility.init(
         () => {
           if (G.stage > 0 && !G.deepSleep) {
             G.sleeping = true;
@@ -393,7 +400,11 @@
     let idx = 0;
     const iv = setInterval(() => {
       idx++;
-      if (idx >= pattern.length) { clearInterval(iv); G.miniGame.showing = false; return; }
+      if (idx >= pattern.length) {
+        clearInterval(iv);
+        if (G.miniGame && G.miniGame.type === 'simon') G.miniGame.showing = false;
+        return;
+      }
       if (gt) gt.textContent = pattern[idx];
     }, 600);
   }
@@ -432,7 +443,8 @@
     if (gp) gp.textContent = '¿Qué número es? (1-9)';
     if (gt) gt.textContent = '❓';
     if (gr) gr.textContent = '';
-    const nums = [1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5).slice(0,6);
+    const others = [1,2,3,4,5,6,7,8,9].filter(n => n !== target).sort(()=>Math.random()-0.5).slice(0,5);
+    const nums = [target, ...others].sort(()=>Math.random()-0.5);
     if (gi) gi.innerHTML = nums.map(n=>`<div class="game-btn" onclick="Krakendork.answerNumber(${n})">${n}</div>`).join('');
   }
 

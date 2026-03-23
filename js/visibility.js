@@ -9,7 +9,7 @@
   const SLEEP_AFTER_MS = 30000; // 30 segundos inactivo
 
   function init(onHide, onShow) {
-    if (!document.hidden !== undefined) return;
+    if (typeof document.hidden === 'undefined') return;
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {

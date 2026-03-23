@@ -4,6 +4,17 @@ Registro de cambios del proyecto Krakendork.
 
 ---
 
+## [2025-03-23] - Fix bugs e incoherencias
+
+### Correcciones
+- **visibility.js**: Check `document.hidden` corregido (era `!document.hidden !== undefined`, ahora `typeof document.hidden === 'undefined'`)
+- **game.js**: `KrakendorkVisibility` → `window.KrakendorkVisibility` (scope)
+- **Minijuego número**: El target ahora siempre está entre las 6 opciones mostradas
+- **Simon**: Guard en setInterval para evitar error cuando G.miniGame es null
+- **Carga desde storage**: Restaurar estado visual de sleep-z, poop y sick-overlay
+
+---
+
 ## [2025-03-23] - Todas las mejoras aplicadas
 
 ### Cambios
