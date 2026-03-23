@@ -4,6 +4,18 @@ Registro de cambios del proyecto Krakendork.
 
 ---
 
+## [2025-03-23] - Jugable desde web, tamaño legible
+
+### Cambios
+- **Pantalla más grande**: 480px (95vw) en desktop
+- **Fuentes legibles**: 10-11px en texto, 56px botones (mín. 44px touch)
+- **Canvas escalado**: hasta 256×192px para mejor visibilidad
+- **Viewport**: Permite zoom para accesibilidad
+- **Responsive**: Padding, breakpoints para móvil y desktop
+- **Menú/paneles**: Fuentes y espaciado aumentados
+
+---
+
 ## [2025-03-23] - Diseño sobrio, solo pantalla de juego
 
 ### Cambios

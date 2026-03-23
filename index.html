@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#2c2a28">
   <title>Krakendork 🐕🦑</title>
   <link rel="manifest" href="manifest.json">
@@ -74,7 +74,7 @@
 
       <div class="stats-panel" id="stats-panel">
         <div class="panel-title">📊 ESTADO</div>
-        <div class="panel-stat"><span class="panel-stat-label">NOMBRE</span><input type="text" id="ps-name" maxlength="12" placeholder="Krakendork" style="font-size:6px;padding:2px;width:60px" onblur="Krakendork.setName(this.value)"></div>
+        <div class="panel-stat"><span class="panel-stat-label">NOMBRE</span><input type="text" id="ps-name" maxlength="12" placeholder="Krakendork" style="font-size:10px;padding:4px;width:80px;font-family:inherit" onblur="Krakendork.setName(this.value)"></div>
         <div class="panel-stat">
           <span class="panel-stat-label">HAMBRE</span>
           <div class="panel-stat-bar" id="ps-hunger-bg"><div id="ps-hunger" style="height:100%;background:var(--pixel);transition:width .3s"></div></div>
@@ -100,13 +100,13 @@
           <div class="panel-stat-bar"><div id="ps-weight" style="height:100%;background:var(--pixel)"></div></div>
           <span class="panel-stat-val" id="psv-weight">5</span>
         </div>
-        <div class="panel-stat" style="margin-top:2px">
-          <span class="panel-stat-label" style="width:auto;font-size:6px">Edad: <span id="ps-age">0</span>d &nbsp; Felices: <span id="ps-hc">0</span></span>
-          <span class="panel-stat-label" id="ps-sick" style="color:#f44;font-size:6px"></span>
+        <div class="panel-stat" style="margin-top:8px">
+          <span class="panel-stat-label" style="width:auto;font-size:10px">Edad: <span id="ps-age">0</span>d &nbsp; Felices: <span id="ps-hc">0</span></span>
+          <span class="panel-stat-label" id="ps-sick" style="color:#f44;font-size:10px"></span>
         </div>
-        <div class="panel-stat" style="font-size:5px" id="ps-achievements"></div>
-        <div style="margin-top:4px;text-align:center;font-size:6px;color:var(--pixel);cursor:pointer;text-decoration:underline" onclick="Krakendork.closeStats()">[ cerrar ]</div>
-        <div style="margin-top:2px;text-align:center;font-size:5px;color:#666;cursor:pointer" onclick="if(confirm('¿Empezar de cero?')){Krakendork.initGame(true);Krakendork.closeStats();}">[ Nuevo huevo ]</div>
+        <div class="panel-stat" style="font-size:10px" id="ps-achievements"></div>
+        <div style="margin-top:8px;text-align:center;font-size:10px;color:var(--pixel);cursor:pointer;text-decoration:underline" onclick="Krakendork.closeStats()">[ cerrar ]</div>
+        <div style="margin-top:4px;text-align:center;font-size:9px;color:#666;cursor:pointer" onclick="if(confirm('¿Empezar de cero?')){Krakendork.initGame(true);Krakendork.closeStats();}">[ Nuevo huevo ]</div>
       </div>
 
       <div class="game-area" id="game-area">
@@ -117,7 +117,7 @@
       </div>
 
       <div class="sick-overlay" id="sick-overlay">
-        <span class="animate-blink" style="font-size:12px">💀</span>
+        <span class="animate-blink" style="font-size:24px">💀</span>
       </div>
 
       <div class="evo-flash" id="evo-flash"></div>
@@ -125,7 +125,7 @@
       <div class="dead-screen deep-sleep-screen" id="dead-screen">
         <div class="ghost animate-float">💤</div>
         <div class="dead-text deep-sleep-text">Krakendork<br>duerme profundamente...</div>
-        <div class="dead-text deep-sleep-text" id="dead-age" style="font-size:6px">Toca Luz para despertar</div>
+        <div class="dead-text deep-sleep-text" id="dead-age" style="font-size:10px">Toca Luz para despertar</div>
         <button class="restart-btn" onclick="Krakendork.wakeFromSleep()">Despertar</button>
       </div>
     </div>
